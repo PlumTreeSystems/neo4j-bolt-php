@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php-versions: ['7.2', '7.3', '7.4']
+        php-versions: ['7.2', '7.3', '7.4', '8.0']
         neo4j-versions: ['3.3', '3.4', '3.5', '4.0']
         include:
           - neo4j-versions: 3.3
@@ -36,29 +36,18 @@ jobs:
       uses: shivammathur/setup-php@v2
       with:
         php-version: ${{ matrix.php-versions }}
-      
-    - name: Cache Composer packages
-      id: composer-cache
-      uses: actions/cache@v2
-      with:
-        path: vendor
-        key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-php-
+        extensions: zip, curl, bcmath, mbstring
 
     - name: Install dependencies
-      if: steps.composer-cache.outputs.cache-hit != 'true'
       run: composer install --prefer-dist --no-progress --no-suggest
-    
+
     - name: Lint
       run: composer lint
-    
+
     - name: Test
       env:
         BOLT_VERSION: ${{ matrix.bolt-version }}
       run: composer test
-    
+
     - name: Coverage
       uses: codecov/codecov-action@v1
-
-   

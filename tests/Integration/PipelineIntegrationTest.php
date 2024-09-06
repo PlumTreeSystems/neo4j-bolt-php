@@ -25,7 +25,7 @@ class PipelineIntegrationTest extends IntegrationTestCase
         $this->assertEquals(2, $results->current()->firstRecord()->getByIndex(0)->get('id'));
 
         // no more statements after pipeline has run
-        $this->setExpectedException(PipelineFinishedException::class);
+        $this->expectException(PipelineFinishedException::class);
         $pipeline->push('CREATE (n:User {id:1}) RETURN n', [], 'first');
     }
 
@@ -35,7 +35,7 @@ class PipelineIntegrationTest extends IntegrationTestCase
         $session = $this->getSession();
         $pipeline = $session->createPipeline();
         // no empty statements
-        $this->setExpectedException(BoltInvalidArgumentException::class);
+        $this->expectException(BoltInvalidArgumentException::class);
         $pipeline->push('');
     }
 
@@ -45,7 +45,7 @@ class PipelineIntegrationTest extends IntegrationTestCase
         $pipeline = $session->createPipeline();
         $pipeline->push('CREATE (n:User {id:1}) RETURN n', [], 'first');
         $pipeline->run();
-        $this->setExpectedException(PipelineFinishedException::class);
+        $this->expectException(PipelineFinishedException::class);
         $pipeline->run();
     }
 }

@@ -19,7 +19,7 @@ use GraphAware\Common\Driver\DriverInterface;
  *
  * @group documentation
  */
-class DocumentationTest extends \PHPUnit_Framework_TestCase
+class DocumentationTest extends \PHPUnit\Framework\TestCase
 {
     public function testSetup()
     {

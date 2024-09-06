@@ -20,7 +20,6 @@ use PTS\Bolt\Protocol\V2\Session as SessionV2;
 use PTS\Bolt\Protocol\V3\Session as SessionV3;
 use PTS\Bolt\Protocol\V4\Session as SessionV4;
 use GraphAware\Common\Driver\DriverInterface;
-use phpDocumentor\Reflection\Types\Self_;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use PTS\Bolt\Exception\HandshakeException;
 
@@ -58,14 +57,14 @@ class Driver implements DriverInterface
     protected $session;
 
     /**
-     * @var array
-     */
-    protected $credentials;
-
-    /**
      * @var int
      */
     private $forceBoltVersion;
+
+    /**
+     * @var Configuration
+     */
+    private $config;
 
     /**
      * @return string
@@ -76,20 +75,25 @@ class Driver implements DriverInterface
     }
 
     /**
-     * @param string $uri
-     * @param Configuration|null $configuration
-     * @param int $forceBoltVersion
+     * @param Configuration $configuration
+     * @param Configuration|null $deprecatedConfiguration @deprecated
      */
-    public function __construct($uri, Configuration $configuration = null, $forceBoltVersion = 0)
+    public function __construct($configuration, Configuration $deprecatedConfiguration = null)
     {
-        $this->forceBoltVersion = $forceBoltVersion;
-        $this->credentials = null !== $configuration ? $configuration->getValue('credentials', []) : [];
-        $config = null !== $configuration ? $configuration : Configuration::create();
-        $parsedUri = parse_url($uri);
-        $host = isset($parsedUri['host']) ? $parsedUri['host'] : $parsedUri['path'];
-        $port = isset($parsedUri['port']) ? $parsedUri['port'] : static::DEFAULT_TCP_PORT;
+        if (is_string($configuration)) {
+            @trigger_error(
+                'Passing string URI as first argument is deprecated. Please pass configuration with Configuration::create()->withUri($uri) as first and only argument', // phpcs:ignore
+                \E_USER_DEPRECATED
+            );
+            $this->config = null !== $deprecatedConfiguration ?
+                $deprecatedConfiguration->withUri($configuration)
+                : Configuration::create()->withUri($configuration);
+        } elseif ($configuration instanceof Configuration) {
+            $this->config = $configuration;
+        }
+        $this->forceBoltVersion = $this->config->getValue('forced_bolt_version');
         $this->dispatcher = new EventDispatcher();
-        $this->io = StreamSocket::withConfiguration($host, $port, $config, $this->dispatcher);
+        $this->io = StreamSocket::withConfiguration($this->config, $this->dispatcher);
         $this->sessionRegistry = new SessionRegistry($this->io, $this->dispatcher);
         $this->sessionRegistry->registerSession(Session::class);
         $this->sessionRegistry->registerSession(SessionV2::class);
@@ -110,7 +114,7 @@ class Driver implements DriverInterface
             $this->versionAgreed = $this->handshake();
         }
 
-        $this->session = $this->sessionRegistry->getSession($this->versionAgreed, $this->credentials);
+        $this->session = $this->sessionRegistry->getSession($this->versionAgreed, $this->config);
 
         return $this->session;
     }

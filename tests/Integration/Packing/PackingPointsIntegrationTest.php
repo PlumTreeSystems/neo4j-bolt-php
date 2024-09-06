@@ -14,7 +14,7 @@ use PTS\Bolt\Type\Point3D;
  */
 class PackingPointsIntegrationTest extends IntegrationTestCase
 {
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->emptyDB();

@@ -6,7 +6,7 @@ use PTS\Bolt\Tests\IntegrationTestCase;
 
 class PackingListIntegrationTest extends IntegrationTestCase
 {
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->emptyDB();

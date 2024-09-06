@@ -11,11 +11,14 @@ services:
     volumes:
       - ./:/app:rw,cached
   neo4j:
-    image: neo4j:4.0
-    environment:
-      - NEO4J_AUTH=none
+    image: neo4j:4.1.4
+    volumes:
+      - ./.certificates:/ssl
     ports:
       - 7474:7474
       - 7687:7687
-
-
+    environment:
+      - NEO4J_AUTH=none
+      - NEO4J_dbms_ssl_policy_bolt_enabled=true
+      - NEO4J_dbms_connector_bolt_tls__level=OPTIONAL
+      - NEO4J_dbms_ssl_policy_bolt_base__directory=/ssl/bolt

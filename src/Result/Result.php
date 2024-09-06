@@ -43,6 +43,11 @@ class Result extends AbstractRecordCursor
     protected $fields;
 
     /**
+     * @var ResultSummary
+     */
+    protected $resultSummary;
+
+    /**
      * {@inheritdoc}
      */
     public function __construct(StatementInterface $statement)
@@ -109,8 +114,17 @@ class Result extends AbstractRecordCursor
 
     /**
      * @return ResultSummary
+     * @deprecated Use getSummary
      */
     public function summarize()
+    {
+        return $this->resultSummary;
+    }
+
+     /**
+     * @return ResultSummary
+     */
+    public function getSummary()
     {
         return $this->resultSummary;
     }

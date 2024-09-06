@@ -2,9 +2,10 @@
 
 ```php
 
-use PTS\Bolt\GraphDatabase;
+use PTS\Bolt\Driver;
+use PTS\Bolt\Configuration;
 
-$driver = GraphDatabase::driver("bolt://localhost");
+$driver = new Driver(Configuration::create()->withUri("bolt://localhost"));
 $session = $driver->session();
 ```
 
@@ -24,13 +25,55 @@ $session->run("CREATE (n) SET n += {props}", ['name' => 'Mike', 'age' => 27]);
 
 ### TLS Encryption
 
-In order to enable TLS support, you need to set the configuration option to `REQUIRED`, here an example :
+In order to enable TLS support, you need to set the configuration option to `REQUIRED` or pass `tls=true` option to URI, here an example :
 
 ```php
-$config = \PTS\Bolt\Configuration::newInstance()
-    ->withCredentials('bolttest', 'L7n7SfTSj0e6U')
+$config = \PTS\Bolt\Configuration::create()
+    ->withUri('bolt://localhost')
     ->withTLSMode(\PTS\Bolt\Configuration::TLSMODE_REQUIRED);
 
-$driver = \PTS\Bolt\GraphDatabase::driver('bolt://hobomjfhocgbkeenl.dbs.graphenedb.com:24786', $config);
+// or
+
+$config = \PTS\Bolt\Configuration::create()
+    ->withUri('bolt://localhost?tls=true');
+
+$driver = new \PTS\Bolt\Driver($config);
 $session = $driver->session();
+```
+
+For self signed certificates use `TLSMODE_REQUIRED_NO_VALIDATION` or `validate_tls=false`.
+
+### Database selection
+
+Database can be selected via URI or `withDatabase` method :
+```php
+$config = \PTS\Bolt\Configuration::create()
+    ->withUri('bolt://localhost')
+    ->withDatabase('test');
+
+// or
+
+$config = \PTS\Bolt\Configuration::create()
+    ->withUri('bolt://localhost/test');
+
+$driver = new \PTS\Bolt\Driver($config);
+$session = $driver->session();
+```
+
+### Bookmarks
+
+You can fetch bookmarks from last result from summary or from session using `lastBookmark` method. To pass bookmarks for new session use `withBookmarks` method :
+```php
+$result = $session1->run('...');
+
+$bookmark = $result->getSummary()->getBookmark()
+// or
+$bookmark = $session1->getLastBookmark();
+
+$config = \PTS\Bolt\Configuration::create()
+    ->withUri('bolt://localhost')
+    ->withBookmarks([$bookmark]);
+
+$driver = new \PTS\Bolt\Driver($config);
+$session2 = $driver->session();
 ```

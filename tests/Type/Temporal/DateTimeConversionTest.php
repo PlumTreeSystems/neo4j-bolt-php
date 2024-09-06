@@ -17,7 +17,7 @@ use PTS\Bolt\Type\Temporal\Time;
  * @group unit
  * @group v2+
  */
-class DateTimeConversionTest extends \PHPUnit_Framework_TestCase
+class DateTimeConversionTest extends \PHPUnit\Framework\TestCase
 {
     public function testDateConversion()
     {

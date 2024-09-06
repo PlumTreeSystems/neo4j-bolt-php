@@ -14,7 +14,7 @@ use PTS\Bolt\Tests\IntegrationTestCase;
  */
 class PackingIntegersIntegrationTest extends IntegrationTestCase
 {
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->emptyDB();

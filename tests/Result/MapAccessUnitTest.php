@@ -8,7 +8,7 @@ namespace PTS\Bolt\Tests\Result;
  *
  * @group result-unit
  */
-class MapAccessUnitTest extends \PHPUnit_Framework_TestCase
+class MapAccessUnitTest extends \PHPUnit\Framework\TestCase
 {
     public function testDefaultValueCanBePassed()
     {
@@ -20,7 +20,7 @@ class MapAccessUnitTest extends \PHPUnit_Framework_TestCase
     public function testExceptionIsThrownIfNotDefaultGiven()
     {
         $map = new DummyMA(['key' => 'val']);
-        $this->setExpectedException(\InvalidArgumentException::class);
+        $this->expectException(\InvalidArgumentException::class);
         $map->value('not_exist');
     }
 }

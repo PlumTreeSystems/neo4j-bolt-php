@@ -21,7 +21,7 @@ use PTS\Bolt\Type\Temporal\Time;
  */
 class PackingTemporalIntegrationTest extends IntegrationTestCase
 {
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->emptyDB();

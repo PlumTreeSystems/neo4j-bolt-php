@@ -20,7 +20,7 @@ class ExceptionDispatchTest extends IntegrationTestCase
     {
         $session = $this->getSession();
 
-        $this->setExpectedException(MessageFailureException::class);
+        $this->expectException(MessageFailureException::class);
         $session->run("CREATE (n:)");
 
         try {
@@ -73,7 +73,7 @@ class ExceptionDispatchTest extends IntegrationTestCase
         $session = $this->getSession();
         $this->createConstraint('User', 'id');
         $session->run('CREATE (n:User {id:1})');
-        $this->setExpectedException(MessageFailureException::class);
+        $this->expectException(MessageFailureException::class);
         $session->run('CREATE (n:User {id:1})');
     }
 
@@ -88,7 +88,7 @@ class ExceptionDispatchTest extends IntegrationTestCase
         $pipeline->push('CREATE (n:User {id:4})');
         $pipeline->push('CREATE (n:User {id:1})');
         $pipeline->push('CREATE (n:User {id:5})');
-        $this->setExpectedException(MessageFailureException::class);
+        $this->expectException(MessageFailureException::class);
         $pipeline->run();
     }
 
@@ -103,7 +103,7 @@ class ExceptionDispatchTest extends IntegrationTestCase
         $pipeline = $session->createPipeline();
         $pipeline->push('CREATE CONSTRAINT ON (u:User) ASSERT u.id IS UNIQUE');
         $pipeline->push('CREATE (n:User {id:1})');
-        $this->setExpectedException(MessageFailureException::class);
+        $this->expectException(MessageFailureException::class);
         $pipeline->run();
     }
 

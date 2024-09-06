@@ -11,53 +11,19 @@
 
 namespace PTS\Bolt;
 
-use GraphAware\Common\Driver\ConfigInterface;
 use GraphAware\Common\Connection\BaseConfiguration;
 
 /**
  * @author Tobias Nyholm <tobias.nyholm@gmail.com>
  */
-class Configuration extends BaseConfiguration implements ConfigInterface
+class Configuration extends BaseConfiguration
 {
+    const DEFAULT_BOLT_PORT = 7687;
     const TLSMODE_REQUIRED = 'REQUIRED';
+    const TLSMODE_REQUIRED_NO_VALIDATION = 'REQUIRED_NO_VALIDATION';
     const TLSMODE_REJECTED = 'REJECTED';
 
-    /**
-     * @var array
-     *
-     * @deprecated
-     */
-    protected $credentials;
-
-    /**
-     * @deprecated
-     */
-    protected $username;
-
-    /**
-     * @deprecated
-     */
-    protected $password;
-
-    /**
-     * @var string
-     *
-     * @deprecated
-     */
-    protected $bindtoInterface;
-
-    /**
-     * @var int
-     *
-     * @deprecated
-     */
-    protected $timeout;
-
-    /**
-     * @deprecated
-     */
-    protected $tlsMode;
-
+    
     /**
      * Create a new configuration with default values.
      *
@@ -66,30 +32,19 @@ class Configuration extends BaseConfiguration implements ConfigInterface
     public static function create()
     {
         return new self([
-            'user' => 'null',
+            'tls_mode' => self::TLSMODE_REJECTED,
+            'forced_bolt_version' => 0,
+            'host' => 'localhost',
+            'port' => self::DEFAULT_BOLT_PORT,
+            'scheme' => 'bolt',
+            'database' => '',
+            'username' => 'null',
             'password' => 'null',
             'bind_to_interface' => 'null',
             'timeout' => 5,
+            'bookmarks' => null,
             'credentials' => ['null', 'null'],
         ]);
-    }
-
-    /**
-     * @return Configuration
-     *
-     * @deprecated Will be removed in 2.0. Use Configuration::create
-     */
-    public static function newInstance()
-    {
-        $config = self::create();
-
-        $config->username = 'null';
-        $config->password = 'null';
-        $config->credentials = ['null', 'null'];
-        $config->bindtoInterface = 'null';
-        $config->timeout = 5;
-
-        return $config;
     }
 
     /**
@@ -100,21 +55,14 @@ class Configuration extends BaseConfiguration implements ConfigInterface
      */
     public function withCredentials($username, $password)
     {
-        if (null === $username || null === $password) {
+        if (null === $username && null === $password) {
             // No change if credentials or null
             return $this;
         }
 
-        $new = $this->setValue('username', $username)
+        return $this->setValue('username', $username)
             ->setValue('password', $password)
             ->setValue('credentials', [$username, $password]);
-
-        // To keep BC
-        $new->username = $username;
-        $new->password = $password;
-        $new->credentials = [$username, $password];
-
-        return $new;
     }
 
     /**
@@ -124,12 +72,7 @@ class Configuration extends BaseConfiguration implements ConfigInterface
      */
     public function bindToInterface($interface)
     {
-        $new = $this->setValue('bind_to_interface', $interface);
-
-        // To keep BC
-        $new->bindtoInterface = $interface;
-
-        return $new;
+        return $this->setValue('bind_to_interface', $interface);
     }
 
     /**
@@ -139,62 +82,17 @@ class Configuration extends BaseConfiguration implements ConfigInterface
      */
     public function withTimeout($timeout)
     {
-        $new = $this->setValue('timeout', $timeout);
-
-        // To keep BC
-        $new->timeout = $timeout;
-
-        return $new;
+        return $this->setValue('timeout', $timeout);
     }
 
     /**
-     * @return array
+     * @param int $version
      *
-     * @deprecated Will be removed in 2.0. Use Configuration::getValue('credentials')
+     * @return Configuration
      */
-    public function getCredentials()
+    public function withBoltVersion($version)
     {
-        return $this->getValue('credentials');
-    }
-
-    /**
-     * @return string
-     *
-     * @deprecated Will be removed in 2.0. Use Configuration::getValue('bind_to_interface')
-     */
-    public function getBindtoInterface()
-    {
-        return $this->getValue('bind_to_interface');
-    }
-
-    /**
-     * @return int
-     *
-     * @deprecated Will be removed in 2.0. Use Configuration::getValue('timeout')
-     */
-    public function getTimeout()
-    {
-        return $this->getValue('timeout');
-    }
-
-    /**
-     * @return mixed
-     *
-     * @deprecated Will be removed in 2.0. Use Configuration::getValue('username')
-     */
-    public function getUsername()
-    {
-        return $this->getValue('username');
-    }
-
-    /**
-     * @return mixed
-     *
-     * @deprecated Will be removed in 2.0. Use Configuration::getValue('password')
-     */
-    public function getPassword()
-    {
-        return $this->getValue('password');
+        return $this->setValue('forced_bolt_version', $version);
     }
 
     /**
@@ -204,21 +102,99 @@ class Configuration extends BaseConfiguration implements ConfigInterface
      */
     public function withTLSMode($mode)
     {
-        $new = $this->setValue('tls_mode', $mode);
+        return $this->setValue('tls_mode', $mode);
+    }
 
-        // To keep BC
-        $new->tlsMode = $mode;
 
-        return $new;
+    /**
+     * @param $scheme
+     *
+     * @return Configuration
+     */
+    public function withScheme($scheme)
+    {
+        return $this->setValue('scheme', $scheme);
+    }
+    
+     /**
+     * @param $host
+     *
+     * @return Configuration
+     */
+    public function withHost($host)
+    {
+        return $this->setValue('host', $host);
+    }
+
+     /**
+     * @param $port
+     *
+     * @return Configuration
+     */
+    public function withPort($port)
+    {
+        return $this->setValue('port', $port);
+    }
+
+     /**
+     * @param $database
+     *
+     * @return Configuration
+     */
+    public function withDatabase($database)
+    {
+        return $this->setValue('database', $database);
     }
 
     /**
-     * @return mixed
+     * @param array $bookmarks
      *
-     * @deprecated Will be removed in 2.0. Use Configuration::getValue('tls_mode')
+     * @return Configuration
      */
-    public function getTlsMode()
+    public function withBookmarks(array $bookmarks)
     {
-        return $this->getValue('tls_mode');
+        return $this->setValue('bookmarks', $bookmarks);
+    }
+
+
+    /**
+     * @param $uri
+     *
+     * @return Configuration
+     */
+    public function withUri($uri)
+    {
+        $parsedUri = parse_url($uri);
+        $newConfig = $this;
+        if (isset($parsedUri['scheme'])) {
+            $newConfig = $newConfig->withScheme($parsedUri['scheme']);
+        }
+        if (isset($parsedUri['user'])) {
+            if (isset($parsedUri['pass'])) {
+                $newConfig = $newConfig->withCredentials($parsedUri['user'], $parsedUri['pass']);
+            } else {
+                $newConfig = $newConfig->withCredentials($parsedUri['user'], null);
+            }
+        }
+        if (isset($parsedUri['host'])) {
+            $newConfig = $newConfig->withHost($parsedUri['host']);
+        }
+        if (isset($parsedUri['port'])) {
+            $newConfig = $newConfig->withPort($parsedUri['port']);
+        }
+        if (isset($parsedUri['path'])) {
+            $newConfig = $newConfig->withDatabase(str_replace('/', '', $parsedUri['path']));
+        }
+        if (isset($parsedUri['query'])) {
+            parse_str($parsedUri['query'], $query);
+            if (isset($query['tls']) && $query['tls'] == 'true') {
+                if (isset($query['validate_tls']) && $query['validate_tls'] == 'false') {
+                    $newConfig = $newConfig->withTLSMode(self::TLSMODE_REQUIRED_NO_VALIDATION);
+                } else {
+                    $newConfig = $newConfig->withTLSMode(self::TLSMODE_REQUIRED);
+                }
+            }
+        }
+        return $newConfig;
     }
 }

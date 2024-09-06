@@ -14,7 +14,7 @@ use PTS\Bolt\Result\Type\Path;
  */
 class PackingGraphStructureIntegrationTest extends IntegrationTestCase
 {
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->emptyDB();
@@ -72,6 +72,6 @@ class PackingGraphStructureIntegrationTest extends IntegrationTestCase
         $result = $session->run("MATCH p=(a:A)-[r*]->(b) RETURN p, length(p) as l");
 
         $this->assertInstanceOf(Path::class, $result->getRecord()->value('p'));
-        $this->assertInternalType('integer', $result->getRecord()->value('l'));
+        $this->assertIsInt($result->getRecord()->value('l'));
     }
 }

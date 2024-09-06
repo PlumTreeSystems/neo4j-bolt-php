@@ -3,3 +3,4 @@ test.php
 phpunit.xml
 .idea/
 clover.xml
+.phpunit.result.cache

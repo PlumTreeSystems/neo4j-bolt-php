@@ -12,7 +12,7 @@ use PTS\Bolt\Protocol\Message\AbstractMessage;
  * @group message
  * @group unit
  */
-class MessageUnitTest extends \PHPUnit_Framework_TestCase
+class MessageUnitTest extends \PHPUnit\Framework\TestCase
 {
     public function testSuccessMessageWithoutFields()
     {

@@ -12,26 +12,19 @@
 namespace PTS\Bolt\Protocol\V1;
 
 use PTS\Bolt\Driver;
-use OutOfBoundsException;
 use PTS\Bolt\IO\AbstractIO;
 use PTS\Bolt\Protocol\Pipeline;
-use PTS\Bolt\Exception\IOException;
-use http\Exception\RuntimeException;
 use PTS\Bolt\Protocol\AbstractSession;
 use GraphAware\Common\Cypher\Statement;
 use PTS\Bolt\Protocol\PipelineInterface;
-use PTS\Bolt\Protocol\Message\RawMessage;
 use PTS\Bolt\Protocol\Message\RunMessage;
 use PTS\Bolt\Protocol\Message\InitMessage;
-use phpDocumentor\Reflection\Types\Boolean;
 use PTS\Bolt\Result\Result as CypherResult;
 use PTS\Bolt\Protocol\Message\PullAllMessage;
 use GraphAware\Common\Result\ResultCollection;
-use PTS\Bolt\Exception\SerializationException;
+use PTS\Bolt\Configuration;
 use PTS\Bolt\Protocol\Message\AbstractMessage;
 use PTS\Bolt\Exception\MessageFailureException;
-use RuntimeException as GlobalRuntimeException;
-use PTS\Bolt\Exception\BoltOutOfBoundsException;
 use PTS\Bolt\Protocol\Message\AckFailureMessage;
 use PTS\Bolt\Exception\BoltInvalidArgumentException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -51,6 +44,16 @@ class Session extends AbstractSession
     public $transaction;
 
     /**
+     * @var Configuration
+     */
+    protected $config;
+
+    /**
+     * @var string
+     */
+    protected $lastBookmark;
+
+    /**
      * @var array
      */
     protected $credentials;
@@ -67,11 +70,12 @@ class Session extends AbstractSession
     public function __construct(
         AbstractIO $io,
         EventDispatcherInterface $dispatcher,
-        array $credentials = [],
+        Configuration $config = null,
         $init = true
     ) {
         parent::__construct($io, $dispatcher);
-        $this->credentials = $credentials;
+        $this->config = $config;
+        $this->credentials = $config ? $config->getValue('credentials', []) : [];
         if ($init) {
             $this->init();
         }
@@ -83,6 +87,11 @@ class Session extends AbstractSession
     public static function getProtocolVersion()
     {
         return self::PROTOCOL_VERSION;
+    }
+
+    public function getLastBookmark(): string
+    {
+        return $this->lastBookmark;
     }
 
     /**
@@ -121,6 +130,13 @@ class Session extends AbstractSession
                 $cypherResult->setStatistics($pullResponse->getMetadata()[0]->getElements()['stats']);
             } else {
                 $cypherResult->setStatistics([]);
+            }
+            if (isset($pullMeta[0]->getElements()['db'])) {
+                $cypherResult->getSummary()->setDatabase($pullMeta[0]->getElements()['db']);
+            }
+            if (isset($pullMeta[0]->getElements()['bookmark'])) {
+                $cypherResult->getSummary()->setBookmark($pullMeta[0]->getElements()['bookmark']);
+                $this->lastBookmark = $pullMeta[0]->getElements()['bookmark'];
             }
         }
 

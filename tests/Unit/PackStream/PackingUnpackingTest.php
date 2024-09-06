@@ -17,7 +17,7 @@ use PTS\Bolt\PackStream\Packer;
  * @group unit
  * @group unpack
  */
-class UnpackerTest extends \PHPUnit_Framework_TestCase
+class UnpackerTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var \PTS\Bolt\PackStream\Unpacker
@@ -29,7 +29,7 @@ class UnpackerTest extends \PHPUnit_Framework_TestCase
      */
     protected $packer;
 
-    public function setUp()
+    protected function setUp(): void
     {
         $this->unpacker = new Unpacker(new StreamChannel(new StreamSocket("bolt://localhost", 7687)));
         $this->packer = new Packer();
@@ -98,10 +98,9 @@ class UnpackerTest extends \PHPUnit_Framework_TestCase
         $bytes = hex2bin("b170a0");
         $raw = new RawMessage($bytes);
         $walker = new BytesWalker($raw);
-        //$walker->forward(1);
-
-        //$sig = $this->unpacker->getSignature($walker);
-        //$this->assertEquals('SUCCESS', $sig);
+        $walker->forward(1);
+        $sig = $this->unpacker->getSignature($walker);
+        $this->assertEquals('SUCCESS', $sig);
     }
 
     /**

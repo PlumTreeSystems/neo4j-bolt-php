@@ -87,7 +87,7 @@ class TCK9TypesTest extends IntegrationTestCase
 
         // collection of null
         $result = $session->run("UNWIND range(0, 2) as r CREATE (n) RETURN collect(n.x) as x");
-        $this->assertInternalType('array', $result->getRecord()->value('x'));
+        $this->assertIsArray($result->getRecord()->value('x'));
         foreach ($result->getRecord()->value('x') as $v) {
             $this->assertEquals(null, $v);
         }
@@ -101,7 +101,7 @@ class TCK9TypesTest extends IntegrationTestCase
         $result = $session->run(
             "UNWIND range(0, 2) as r CREATE (n) SET n.x = (id(n) = id(n)) RETURN collect(n.x) as x"
         );
-        $this->assertInternalType('array', $result->getRecord()->value('x'));
+        $this->assertIsArray($result->getRecord()->value('x'));
         foreach ($result->getRecord()->value('x') as $v) {
             $this->assertEquals(true, $v);
         }
@@ -120,24 +120,24 @@ class TCK9TypesTest extends IntegrationTestCase
         );
         $this->assertCount(3, $result->getRecord()->value('x'));
         foreach ($result->getRecord()->value('x') as $v) {
-            $this->assertInternalType('float', $v);
+            $this->assertIsFloat($v);
         }
 
         // int
         $result = $session->run("CREATE (n) RETURN id(n) as id");
-        $this->assertInternalType('int', $result->getRecord()->value('id'));
+        $this->assertIsInt($result->getRecord()->value('id'));
         $this->assertTrue($result->getRecord()->value('id') >= 0);
 
         // collection of integers
         $result = $session->run("UNWIND range(0, 2) as r CREATE (n:X) SET n.k = id(n) RETURN collect(n.k) as x");
         $this->assertCount(3, $result->getRecord()->value('x'));
         foreach ($result->getRecord()->value('x') as $v) {
-            $this->assertInternalType('int', $v);
+            $this->assertIsInt($v);
         }
 
         // list<any>
         $result = $session->run("CREATE (n:Person:Male) RETURN labels(n) as l");
-        $this->assertInternalType('array', $result->getRecord()->value('l'));
+        $this->assertIsArray($result->getRecord()->value('l'));
         $this->assertTrue(array_key_exists(0, $result->getRecord()->value('l')));
         $this->assertTrue(array_key_exists(1, $result->getRecord()->value('l')));
 
@@ -145,23 +145,23 @@ class TCK9TypesTest extends IntegrationTestCase
         $result = $session->run("UNWIND range(0, 2) as r CREATE (n:X) RETURN collect(labels(n)) as x");
         $this->assertCount(3, $result->getRecord()->value('x'));
         foreach ($result->getRecord()->value('x') as $v) {
-            $this->assertInternalType('array', $v);
+            $this->assertIsArray($v);
             $this->assertEquals('X', $v[0]);
         }
 
         // map<string:any>
         $result = $session->run("CREATE (n:Node) RETURN {id: id(n), labels: labels(n)} as map");
-        $this->assertInternalType('array', $result->getRecord()->value('map'));
+        $this->assertIsArray($result->getRecord()->value('map'));
         $this->assertTrue(array_key_exists('id', $result->getRecord()->value('map')));
         $this->assertTrue(array_key_exists('labels', $result->getRecord()->value('map')));
-        $this->assertInternalType('int', $result->getRecord()->value('map')['id']);
-        $this->assertInternalType('array', $result->getRecord()->value('map')['labels']);
+        $this->assertIsInt($result->getRecord()->value('map')['id']);
+        $this->assertIsArray($result->getRecord()->value('map')['labels']);
 
         // collection of map<string:any>
         $result = $session->run("UNWIND range(0, 2) as r CREATE (n:X) RETURN collect({labels: labels(n)}) as x");
         $this->assertCount(3, $result->getRecord()->value('x'));
         foreach ($result->getRecord()->value('x') as $v) {
-            $this->assertInternalType('array', $v);
+            $this->assertIsArray($v);
             $this->assertArrayHasKey('labels', $v);
             $this->assertEquals('X', $v['labels'][0]);
         }

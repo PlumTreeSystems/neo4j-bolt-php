@@ -30,7 +30,8 @@ class RealLifeUseCasesITest extends IntegrationTestCase
         MERGE (o:Person {id: prev})
         MERGE (p)-[:KNOWS]->(o)';
 
-        $this->getSession()->run($query, ['batches' => $batches]);
+        $result = $this->getSession()->run($query, ['batches' => $batches]);
+        $this->assertNotNull($result);
     }
 
     /**

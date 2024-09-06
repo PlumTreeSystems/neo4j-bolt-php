@@ -13,6 +13,7 @@ namespace PTS\Bolt\Protocol;
 
 use PTS\Bolt\IO\AbstractIO;
 use GraphAware\Common\Driver\SessionInterface;
+use PTS\Bolt\Configuration;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class SessionRegistry
@@ -76,11 +77,11 @@ class SessionRegistry
 
     /**
      * @param int $version
-     * @param array $credentials
+     * @param Configuration $config
      *
      * @return SessionInterface
      */
-    public function getSession($version, array $credentials)
+    public function getSession($version, Configuration $config)
     {
         $v = (int)$version;
 
@@ -89,6 +90,6 @@ class SessionRegistry
         }
         $class = $this->sessions[$v];
 
-        return new $class($this->io, $this->dispatcher, $credentials);
+        return new $class($this->io, $this->dispatcher, $config);
     }
 }

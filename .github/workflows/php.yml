@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         php-versions: ['7.2', '7.3', '7.4']
-        neo4j-versions: ['3.3', '3.4', '3.5', '4.0']
+        neo4j-versions: ['3.3', '3.4', '3.5', '4.0', '4.1']
         include:
           - neo4j-versions: 3.3
             bolt-version: 1
@@ -22,16 +22,29 @@ jobs:
             bolt-version: 3
           - neo4j-versions: 4.0
             bolt-version: 4
+          - neo4j-versions: 4.1
+            bolt-version: 4
     services:
       neo4j:
         image: neo4j:${{ matrix.neo4j-versions }}
+        volumes:
+          - ${{ github.workspace }}/.certificates:/ssl
         env:
           NEO4J_AUTH: none
+          NEO4J_dbms_ssl_policy_bolt_enabled: true
+          NEO4J_dbms_connector_bolt_tls__level: OPTIONAL
+          NEO4J_dbms_ssl_policy_bolt_base__directory: /ssl/bolt
         ports: 
           - 7687:7687
     steps:
     - uses: actions/checkout@v2
 
+    - name: Wait for neo4j to fail
+      run: while docker ps | grep neo4j ; do sleep 2 ; done
+      
+    - name: Restart neo4j
+      run: docker start ${{ job.services.neo4j.id }}
+    
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
       with:
@@ -52,6 +65,9 @@ jobs:
     
     - name: Lint
       run: composer lint
+    
+    - name: Wait for neo4j to be ready
+      run: until docker exec ${{ job.services.neo4j.id }} wget -q -O - localhost:7474 > /dev/null ; do sleep 2; done 
     
     - name: Test
       env:

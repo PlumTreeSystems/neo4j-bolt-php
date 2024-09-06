@@ -11,7 +11,7 @@ use PTS\Bolt\Result\Type\Node;
  */
 class MovieExampleTest extends IntegrationTestCase
 {
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->emptyDB();
@@ -61,7 +61,7 @@ QUERY;
         $movieNode = $record->nodeValue('m');
         $this->assertInstanceOf(Node::class, $movieNode);
 
-        $this->setExpectedException(\InvalidArgumentException::class);
+        $this->expectException(\InvalidArgumentException::class);
         $record->nodeValue('z');
     }
 }

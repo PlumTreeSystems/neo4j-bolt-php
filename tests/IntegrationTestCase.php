@@ -6,7 +6,7 @@ use PTS\Bolt\Configuration;
 use PTS\Bolt\Driver;
 use PTS\Bolt\GraphDatabase;
 
-class IntegrationTestCase extends \PHPUnit_Framework_TestCase
+class IntegrationTestCase extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var \PTS\Bolt\Driver
@@ -16,21 +16,27 @@ class IntegrationTestCase extends \PHPUnit_Framework_TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
-        $version = getenv('BOLT_VERSION') ? getenv('BOLT_VERSION') : 0;
-        $this->driver = new Driver(
-            $this->getBoltUrl(),
-            $this->getConfig(),
-            (int)$version
-        );
+        $this->setDriverWhithConfig($this->getConfig());
     }
 
     protected function getConfig()
     {
-        return getenv('NEO4J_USER') ?
-            Configuration::create()->withCredentials(getenv('NEO4J_USER'), getenv('NEO4J_PASSWORD'))
-            : Configuration::create();
+        $version = (int)(getenv('BOLT_VERSION') ? getenv('BOLT_VERSION') : 0);
+        return (getenv('NEO4J_USER') ?
+            Configuration::create()
+                ->withCredentials(getenv('NEO4J_USER'), getenv('NEO4J_PASSWORD'))
+                ->withBoltVersion($version)
+            : Configuration::create())->withBoltVersion($version);
+    }
+
+    protected function setDriverWhithConfig(Configuration $config)
+    {
+        $this->driver = new Driver(
+            $this->getBoltUrl(),
+            $config
+        );
     }
 
     /**

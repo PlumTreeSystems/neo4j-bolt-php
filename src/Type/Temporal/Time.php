@@ -3,12 +3,15 @@
 
 namespace PTS\Bolt\Type\Temporal;
 
+use PTS\Bolt\Misc\DateHelperTrait;
 use PTS\Bolt\PackStream\Packer;
 use PTS\Bolt\Protocol\Constants;
 use PTS\Bolt\Type\PackableType;
 
 class Time implements DateTimeConvertible, PackableType
 {
+    use DateHelperTrait;
+    
     const MARKER = Constants::MARKER_TIME;
     const SIGNATURE = Constants::SIGNATURE_TIME;
 
@@ -43,7 +46,7 @@ class Time implements DateTimeConvertible, PackableType
     {
         $date = new \DateTime(
             'today midnight',
-            new \DateTimeZone(timezone_name_from_abbr('', $this->zoneOffset, 1))
+            $this->zoneFromOffset($this->zoneOffset)
         );
         $seconds = $this->nanoSecondsSinceMidnight / 1000000000;
         $date->modify("+$seconds seconds");

@@ -3,12 +3,15 @@
 
 namespace PTS\Bolt\Type\Temporal;
 
+use PTS\Bolt\Misc\DateHelperTrait;
 use PTS\Bolt\PackStream\Packer;
 use PTS\Bolt\Protocol\Constants;
 use PTS\Bolt\Type\PackableType;
 
 class DateTimeOffset implements DateTimeConvertible, PackableType
 {
+    use DateHelperTrait;
+
     const MARKER = Constants::MARKER_DATE_TIME_OFFSET;
     const SIGNATURE = Constants::SIGNATURE_DATE_TIME_OFFSET;
 
@@ -46,7 +49,7 @@ class DateTimeOffset implements DateTimeConvertible, PackableType
         $date = new \DateTime();
         $date
             ->setTimestamp($this->epochSeconds)
-            ->setTimezone(new \DateTimeZone(timezone_name_from_abbr('', $this->zoneOffset, 1)));
+            ->setTimezone($this->zoneFromOffset($this->zoneOffset));
         return $date;
     }
 

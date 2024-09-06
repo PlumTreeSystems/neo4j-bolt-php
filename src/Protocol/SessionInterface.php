@@ -69,4 +69,10 @@ interface SessionInterface extends BaseSessionInterface
      * @return void
      */
     public function rollback();
+
+    /**
+     * Return last received bookmark
+     * @return string
+     */
+    public function getLastBookmark(): string;
 }

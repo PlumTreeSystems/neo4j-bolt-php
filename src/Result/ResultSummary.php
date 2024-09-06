@@ -20,6 +20,16 @@ class ResultSummary implements ResultSummaryInterface
     protected $updateStatistics;
 
     /**
+     * @var string
+     */
+    protected $database = '';
+
+    /**
+     * @var string
+     */
+    protected $bookmark = '';
+
+    /**
      * @param StatementInterface $statement
      */
     public function __construct(StatementInterface $statement)
@@ -69,5 +79,25 @@ class ResultSummary implements ResultSummaryInterface
     public function notifications()
     {
         // TODO: Implement notifications() method.
+    }
+
+    public function getDatabase(): string
+    {
+        return $this->database;
+    }
+
+    public function setDatabase(string $database)
+    {
+        $this->database = $database;
+    }
+
+    public function getBookmark(): string
+    {
+        return $this->bookmark;
+    }
+
+    public function setBookmark(string $bookmark)
+    {
+        $this->bookmark = $bookmark;
     }
 }

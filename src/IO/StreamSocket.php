@@ -61,6 +61,11 @@ class StreamSocket extends AbstractIO
     private $configuration;
 
     /**
+     * @var null|float
+     */
+    private $lastRead = null;
+
+    /**
      * @param string $host
      * @param int $port
      * @param array|null $context
@@ -175,6 +180,19 @@ class StreamSocket extends AbstractIO
     public function readChunk($l = 8192)
     {
         $data = stream_socket_recvfrom($this->sock, $l);
+        if (empty($data)) {
+            if ($this->lastRead === null) {
+                $this->lastRead = microtime(true);
+            } else {
+                $timeSinceLastRead = microtime(true) - $this->lastRead;
+                // 5 minutes
+                if ($timeSinceLastRead > 60 * 5) {
+                    throw new IOException('Timeout reached');
+                }
+            }
+        } else {
+            $this->lastRead = null;
+        }
         //echo Helper::prettyHex($data);
 
         return $data;
